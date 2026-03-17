@@ -42,9 +42,54 @@ If it does not exist:
 
 ---
 
+## 1b. User Correction Detection — Conversational Errors
+
+Errors are not only technical. When the user corrects you, that is ALSO a learning opportunity. Detect user corrections by watching for phrases like:
+
+- "no, that's wrong" / "that's not right" / "that's incorrect"
+- "don't do that" / "never do that" / "stop doing that"
+- "that's not what I asked" / "I said X not Y"
+- "undo that" / "revert that" / "that broke things"
+- "you already made this mistake" / "we went through this"
+- "use X instead" / "the correct way is..." / "actually..."
+- Any explicit statement that your output, approach, or code was wrong
+
+### When a user correction is detected:
+
+1. **Acknowledge the correction immediately.** Do not defend the wrong approach.
+2. **Analyze what went wrong** — why did you produce the wrong output? Was it a misunderstanding, a wrong assumption, a pattern you defaulted to incorrectly?
+3. **Extract a lesson** following the same format as technical errors, but use category `correction`:
+
+```markdown
+### [YYYY-MM-DD] correction: one-line summary of what to do differently
+- **Error**: What you did wrong (the incorrect action or output)
+- **Root cause**: Why you did it (wrong assumption, default behavior, misread context)
+- **Fix**: What the correct approach is (the user's preferred way)
+- **Prevention**: Rule to follow in this project going forward
+- **Hits**: 1
+```
+
+4. **User corrections skip the confidence gate** — they go directly to Active Lessons. The user IS the ground truth. One correction is enough.
+
+### Examples of correction-based lessons:
+
+- User says "don't use semicolons in this project" → `[correction] This project uses no-semicolon style`
+- User says "we use pnpm not npm here" → `[correction] Use pnpm for all package operations`
+- User says "stop adding comments to my code" → `[correction] Do not add comments unless explicitly requested`
+- User says "that's not how our API works, the endpoint is /v2/ not /v1/" → `[correction] API base path is /v2/ in this project`
+- User says "you keep installing the wrong version" → `[correction] Pin dependency to version X.Y.Z`
+
+### What makes this different from CLAUDE.md:
+
+- CLAUDE.md stores proactive instructions the user writes upfront
+- learn-by-mistake `correction` lessons capture reactive fixes from real interactions
+- Correction lessons include the WRONG approach too — so you know what NOT to do
+
+---
+
 ## 2. Error Detection — Check Lessons FIRST
 
-When you encounter ANY error — test failure, build error, runtime crash, command failure, linter warning, type error — follow this sequence **before** attempting a fix:
+When you encounter ANY error — whether technical (test failure, build error, runtime crash, command failure) OR conversational (user correction, wrong approach, misunderstood requirement) — follow this sequence **before** attempting a fix:
 
 ### Step A: Search for matching lesson
 Read `.claude/lessons.md` (if it exists). Scan the **Active Lessons** section for entries where the **Error** pattern matches the current error. Match on:

@@ -106,6 +106,20 @@ Session 3:
 
 No prompting. No reminders. The skill remembers so you don't have to.
 
+It also learns from **your corrections**:
+
+```
+User: "No, we use pnpm here, not npm"
+
+  📝 Active lesson: [correction] Use pnpm for all package operations in this project
+  (User corrections skip the confidence gate — one correction is enough)
+
+Later:
+  User: "install lodash"
+  📝 Applying lesson: Use pnpm
+  → pnpm add lodash ✓
+```
+
 ## What It Learns
 
 | Category | Examples | Detection |
@@ -118,6 +132,9 @@ No prompting. No reminders. The skill remembers so you don't have to.
 | **git** | Merge conflicts, detached HEAD, hook failures | Git command stderr |
 | **dependency** | Version conflicts, peer dependency warnings, missing packages | npm/yarn/pnpm errors |
 | **config** | Wrong env vars, malformed JSON/YAML, path issues | Config parse errors |
+| **correction** | "Don't use semicolons", "use pnpm not npm", "that's wrong" | User says something is incorrect or should be different |
+
+**User corrections skip the confidence gate** — they go directly to Active Lessons. The user is the ground truth. One correction is enough.
 
 ## File Structure
 

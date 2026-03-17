@@ -1,0 +1,9 @@
+{
+  "name": "learn-by-mistake",
+  "description": "Persistent error memory — analyzes failures, extracts root-cause lessons, and prevents the same mistake twice",
+  "version": "1.0.0",
+  "author": { "name": "Juan Marchetto" },
+  "homepage": "https://github.com/JuanMarchetto/learn-by-mistake-skill",
+  "repository": "https://github.com/JuanMarchetto/learn-by-mistake-skill",
+  "license": "MIT"
+}

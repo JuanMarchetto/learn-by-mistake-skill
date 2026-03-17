@@ -68,14 +68,6 @@ Lessons are sanitized before they are written to disk. The skill scans every les
 
 Your lessons file is safe to commit to version control.
 
-## Commands
-
-| Command | What it does |
-|---------|-------------|
-| `/learn` | Force-extract a lesson from the last error, bypassing the confidence gate |
-| `/lessons` | Browse, search, and manage your active lessons |
-| `/forget` | Remove or archive a specific lesson |
-
 ## Example
 
 ```

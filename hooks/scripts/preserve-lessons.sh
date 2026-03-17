@@ -16,9 +16,9 @@ EOF
 fi
 
 # Count active lessons for the reminder
-ACTIVE_COUNT=$(grep -c '^### [0-9]' "$LESSONS_FILE" 2>/dev/null || echo "0")
+ACTIVE_COUNT=$(grep -c '^### \[' "$LESSONS_FILE" 2>/dev/null || echo "0")
 
-# Extract lesson titles for a quick reference list
+# Extract lesson summaries for a quick reference list
 TITLES=$(python3 -c "
 import re
 
@@ -29,7 +29,7 @@ try:
     # Find Active Lessons section
     active_match = re.search(r'## Active Lessons\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
     if active_match:
-        titles = re.findall(r'^### \d+\.\s*(.+)$', active_match.group(1), re.MULTILINE)
+        titles = re.findall(r'^### \[.+\] .+: (.+)$', active_match.group(1), re.MULTILINE)
         for t in titles[:10]:  # Cap at 10 to keep message short
             print(f'  - {t}')
         if len(titles) > 10:

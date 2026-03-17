@@ -15,17 +15,10 @@ EOF
   exit 0
 fi
 
-# Count active lessons
-ACTIVE_COUNT=$(grep -c '^### [0-9]' "$LESSONS_FILE" 2>/dev/null || echo "0")
-
-# If we can parse sections, count per section
-ACTIVE_SECTION_COUNT=0
-PENDING_COUNT=0
-ARCHIVE_COUNT=0
-
-# Use awk to count lessons per section
-read -r ACTIVE_SECTION_COUNT PENDING_COUNT ARCHIVE_COUNT <<< $(python3 -c "
-import re, sys
+# Parse lesson counts and categories in a single python3 call
+read -r ACTIVE_SECTION_COUNT PENDING_COUNT ARCHIVE_COUNT CATEGORIES <<< $(python3 -c "
+import re
+from collections import Counter
 
 try:
     with open('$LESSONS_FILE', 'r') as f:
@@ -33,43 +26,28 @@ try:
 
     sections = re.split(r'^## ', content, flags=re.MULTILINE)
     active = pending = archive = 0
+    active_text = ''
 
     for section in sections:
-        lesson_count = len(re.findall(r'^### \d+\.', section, re.MULTILINE))
+        lesson_count = len(re.findall(r'^### \[', section, re.MULTILINE))
         header = section.split('\n')[0].strip().lower()
         if 'active' in header:
             active = lesson_count
+            active_text = section
         elif 'pending' in header:
             pending = lesson_count
         elif 'archive' in header:
             archive = lesson_count
 
-    print(f'{active} {pending} {archive}')
+    # Extract categories from heading lines: ### [YYYY-MM-DD] category: summary
+    cats = re.findall(r'^### \[[\d-]+\]\s+(\w+):', active_text, re.MULTILINE)
+    counts = Counter(cats)
+    cat_str = ', '.join(f'{cat}({n})' for cat, n in counts.most_common()) if cats else 'none'
+
+    print(f'{active} {pending} {archive} {cat_str}')
 except:
-    print('0 0 0')
-" 2>/dev/null || echo "0 0 0")
-
-# Extract categories of active lessons
-CATEGORIES=$(python3 -c "
-import re
-
-try:
-    with open('$LESSONS_FILE', 'r') as f:
-        content = f.read()
-
-    # Find the Active Lessons section
-    active_match = re.search(r'## Active Lessons\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
-    if active_match:
-        cats = re.findall(r'\*\*Category\*\*:\s*(\w+)', active_match.group(1))
-        from collections import Counter
-        counts = Counter(cats)
-        parts = [f'{cat}({n})' for cat, n in counts.most_common()]
-        print(', '.join(parts) if parts else 'none')
-    else:
-        print('none')
-except:
-    print('none')
-" 2>/dev/null || echo "none")
+    print('0 0 0 none')
+" 2>/dev/null || echo "0 0 0 none")
 
 # Build the summary message
 SUMMARY="Learn-by-Mistake skill active. Loaded $ACTIVE_SECTION_COUNT active lessons"

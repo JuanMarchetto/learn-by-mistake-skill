@@ -24,6 +24,8 @@ cp -r learn-by-mistake-skill ~/.claude/skills/learn-by-mistake
 
 ## How It Works
 
+![demo](demo/demo.gif)
+
 A closed loop that turns every failure into a permanent advantage:
 
 ```
@@ -58,11 +60,11 @@ Use `/learn` to bypass the gate and force-promote a lesson when you know it matt
 
 Lessons are sanitized before they are written to disk. The skill scans every lesson for sensitive data and redacts it automatically:
 
-- API keys and tokens --> `[REDACTED_KEY]`
-- Passwords and secrets --> `[REDACTED_SECRET]`
-- Absolute paths with usernames --> `~/...`
-- Connection strings --> `[REDACTED_CONNECTION]`
-- Environment-specific values --> `[ENV_VALUE]`
+- API keys and tokens --> `<REDACTED_API_KEY>`
+- Passwords and secrets --> `<REDACTED_SECRET>`
+- Absolute paths with usernames --> `<PROJECT_PATH>/...`
+- Connection strings --> `<REDACTED_CONNECTION_STRING>`
+- Environment-specific values --> `<REDACTED_ENV>`
 
 Your lessons file is safe to commit to version control.
 
@@ -129,8 +131,6 @@ learn-by-mistake-skill/
     scripts/             # Hook scripts for error detection
   references/            # Pattern databases and detection rules
   templates/             # Lesson file templates
-  scripts/               # Utility scripts
-  demo/                  # Demo scenarios
   LICENSE
   README.md
 ```

@@ -67,29 +67,39 @@ if [ "$EXIT_CODE" != "0" ] && [ -n "$EXIT_CODE" ]; then
   ERROR_TYPE="exit_code=$EXIT_CODE"
 fi
 
+# Exclusion patterns — false-positive strings that should NOT trigger error detection
+EXCLUSION_PATTERNS="0 error|no error|0 failed|error handling|error\.ts|error\.js"
+
+# Helper: check if text matches exclusion patterns (returns 0 if should be excluded)
+should_exclude() {
+  local text="$1"
+  echo "$text" | grep -iqE "$EXCLUSION_PATTERNS" 2>/dev/null
+}
+
 # Check 2: Error patterns in stderr
 if [ -n "$STDERR" ]; then
-  # Case-sensitive patterns
+  # Case-sensitive patterns (strong signals — trigger regardless of exit code)
   CASE_SENSITIVE_PATTERNS="FAIL|ENOENT|TypeError|SyntaxError|ReferenceError|BUILD FAILED|Traceback|Permission denied|Cannot find"
-  # Case-insensitive patterns
+  # Case-insensitive patterns (weaker signals — only trigger when exit code is also non-zero)
   CASE_INSENSITIVE_PATTERNS="error|failed|panic|not found|compilation failed"
 
-  if echo "$STDERR" | grep -qE "$CASE_SENSITIVE_PATTERNS" 2>/dev/null; then
-    ERROR_DETECTED=true
-    # Extract the first matching pattern for context
-    MATCH=$(echo "$STDERR" | grep -oE "$CASE_SENSITIVE_PATTERNS" 2>/dev/null | head -1)
-    if [ -n "$ERROR_TYPE" ]; then
-      ERROR_TYPE="$ERROR_TYPE, stderr=$MATCH"
-    else
-      ERROR_TYPE="stderr=$MATCH"
-    fi
-  elif echo "$STDERR" | grep -iqE "$CASE_INSENSITIVE_PATTERNS" 2>/dev/null; then
-    ERROR_DETECTED=true
-    MATCH=$(echo "$STDERR" | grep -ioE "$CASE_INSENSITIVE_PATTERNS" 2>/dev/null | head -1)
-    if [ -n "$ERROR_TYPE" ]; then
-      ERROR_TYPE="$ERROR_TYPE, stderr=$MATCH"
-    else
-      ERROR_TYPE="stderr=$MATCH"
+  if ! should_exclude "$STDERR"; then
+    if echo "$STDERR" | grep -qE "$CASE_SENSITIVE_PATTERNS" 2>/dev/null; then
+      ERROR_DETECTED=true
+      MATCH=$(echo "$STDERR" | grep -oE "$CASE_SENSITIVE_PATTERNS" 2>/dev/null | head -1)
+      if [ -n "$ERROR_TYPE" ]; then
+        ERROR_TYPE="$ERROR_TYPE, stderr=$MATCH"
+      else
+        ERROR_TYPE="stderr=$MATCH"
+      fi
+    elif [ "$EXIT_CODE" != "0" ] && [ -n "$EXIT_CODE" ] && echo "$STDERR" | grep -iqE "$CASE_INSENSITIVE_PATTERNS" 2>/dev/null; then
+      ERROR_DETECTED=true
+      MATCH=$(echo "$STDERR" | grep -ioE "$CASE_INSENSITIVE_PATTERNS" 2>/dev/null | head -1)
+      if [ -n "$ERROR_TYPE" ]; then
+        ERROR_TYPE="$ERROR_TYPE, stderr=$MATCH"
+      else
+        ERROR_TYPE="stderr=$MATCH"
+      fi
     fi
   fi
 fi
@@ -99,14 +109,16 @@ if [ "$ERROR_DETECTED" = false ] && [ -n "$STDOUT" ]; then
   CASE_SENSITIVE_PATTERNS="FAIL|ENOENT|TypeError|SyntaxError|ReferenceError|BUILD FAILED|Traceback|Permission denied|Cannot find"
   CASE_INSENSITIVE_PATTERNS="error|failed|panic|not found|compilation failed"
 
-  if echo "$STDOUT" | grep -qE "$CASE_SENSITIVE_PATTERNS" 2>/dev/null; then
-    ERROR_DETECTED=true
-    MATCH=$(echo "$STDOUT" | grep -oE "$CASE_SENSITIVE_PATTERNS" 2>/dev/null | head -1)
-    ERROR_TYPE="stdout=$MATCH"
-  elif echo "$STDOUT" | grep -iqE "$CASE_INSENSITIVE_PATTERNS" 2>/dev/null; then
-    ERROR_DETECTED=true
-    MATCH=$(echo "$STDOUT" | grep -ioE "$CASE_INSENSITIVE_PATTERNS" 2>/dev/null | head -1)
-    ERROR_TYPE="stdout=$MATCH"
+  if ! should_exclude "$STDOUT"; then
+    if echo "$STDOUT" | grep -qE "$CASE_SENSITIVE_PATTERNS" 2>/dev/null; then
+      ERROR_DETECTED=true
+      MATCH=$(echo "$STDOUT" | grep -oE "$CASE_SENSITIVE_PATTERNS" 2>/dev/null | head -1)
+      ERROR_TYPE="stdout=$MATCH"
+    elif [ "$EXIT_CODE" != "0" ] && [ -n "$EXIT_CODE" ] && echo "$STDOUT" | grep -iqE "$CASE_INSENSITIVE_PATTERNS" 2>/dev/null; then
+      ERROR_DETECTED=true
+      MATCH=$(echo "$STDOUT" | grep -ioE "$CASE_INSENSITIVE_PATTERNS" 2>/dev/null | head -1)
+      ERROR_TYPE="stdout=$MATCH"
+    fi
   fi
 fi
 

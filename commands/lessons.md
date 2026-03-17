@@ -35,7 +35,7 @@ Parse the user's input after `/lessons` to determine which sub-command to run. I
 ### `/lessons search <term>` — Search Lessons
 
 1. Search across all sections (Active, Pending, Archive) in `.claude/lessons.md`
-2. Match against: title, pattern, fix, and category fields
+2. Match against: summary, error, root cause, fix, and prevention fields
 3. Case-insensitive search
 4. Display matching lessons with their section indicated:
    ```

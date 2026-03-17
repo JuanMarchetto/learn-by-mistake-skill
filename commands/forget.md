@@ -11,7 +11,7 @@ You are the Learn-by-Mistake skill's lesson removal tool. The user has triggered
 
 1. **Parse the argument**:
    - If a number is given (e.g., `/forget 5`): find lesson #5 by its number
-   - If text is given (e.g., `/forget docker volumes`): search for matching lessons by keyword across title, pattern, and fix fields
+   - If text is given (e.g., `/forget docker volumes`): search for matching lessons by keyword across summary, error, root cause, fix, and prevention fields
    - If no argument is given: ask the user which lesson to forget
 
 2. **Find the lesson** in `.claude/lessons.md`:
@@ -23,11 +23,11 @@ You are the Learn-by-Mistake skill's lesson removal tool. The user has triggered
    ```
    Found lesson to archive:
 
-   ### 5. Mount Docker volumes with correct permissions
-   - **Pattern**: Permission denied errors inside container
-   - **Fix**: Use --user flag or match UID/GID with host
-   - **Category**: config
-   - **Added**: 2026-03-10
+   ### [2026-03-10] config: Mount Docker volumes with correct permissions
+   - **Error**: Permission denied errors inside container when writing to mounted volume
+   - **Root cause**: Container runs as root (UID 0) but host volume is owned by a non-root user
+   - **Fix**: Use `--user $(id -u):$(id -g)` flag or match UID/GID with host
+   - **Prevention**: Always set user/group mapping when mounting host directories into containers
    - **Hits**: 3
 
    Archive this lesson? (yes/no/delete)
@@ -49,5 +49,4 @@ You are the Learn-by-Mistake skill's lesson removal tool. The user has triggered
 
 - Archived lessons are NOT deleted — they remain searchable via `/lessons search`
 - When moving to Archive, preserve the original lesson number for reference
-- Re-number remaining active lessons if needed to keep them sequential
 - If the user forgets a lesson that has high hits (>5), warn them: "This lesson has been applied [N] times. Are you sure you want to archive it?"

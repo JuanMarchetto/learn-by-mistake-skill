@@ -143,10 +143,39 @@ your-project/
     lessons.md           # Your project's lesson memory
 ```
 
+## Two Modes
+
+### Automatic (SKILL.md — works everywhere)
+The skill is **always active** when loaded. Every time a command fails, Claude checks lessons before fixing and extracts new lessons after. No setup needed. Works on Claude Code, Codex CLI, Gemini CLI, Cursor, Windsurf.
+
+### Accelerated (hooks — Claude Code only)
+For faster detection, install the PostToolUse hooks:
+
+```
+/learn setup
+```
+
+This merges hooks into your existing `.claude/hooks.json` without touching other hooks. The hooks give you:
+- Instant error detection on every Bash failure
+- Lesson loading at session start
+- Lesson preservation through context compaction
+
+To remove: `/learn setup --remove`
+
+## Commands
+
+| Command | What it does |
+|---------|-------------|
+| `/learn` | Force-extract a lesson from the last error |
+| `/learn setup` | Install hooks for accelerated detection (merges, never overwrites) |
+| `/lessons` | Browse, search, and manage your active lessons |
+| `/forget` | Remove or archive a specific lesson |
+
 ## Requirements
 
-- **Claude Code** -- hooks accelerate error detection, but the skill works without them
-- **No external dependencies** -- pure markdown, no installs, no build step
+- **Any AI coding assistant** that supports SKILL.md
+- **No external dependencies** — pure markdown, no installs, no build step
+- **Optional**: Claude Code hooks for accelerated detection (`/learn setup`)
 
 ## License
 
